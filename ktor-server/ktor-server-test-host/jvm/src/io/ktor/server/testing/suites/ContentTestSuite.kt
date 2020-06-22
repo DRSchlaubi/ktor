@@ -381,7 +381,7 @@ abstract class ContentTestSuite<TEngine : ApplicationEngine, TConfiguration : Ap
     fun testStaticServe() {
         createAndStartServer {
             static("/files/") {
-                resources("io/ktor/server/testing")
+                resources("io/ktor/server/testing/suites")
             }
         }
 
