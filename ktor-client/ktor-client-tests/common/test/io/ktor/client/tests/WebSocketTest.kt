@@ -107,12 +107,16 @@ class WebSocketTest : ClientLoader() {
                 val session = client.webSocketSession {
                     url("$TEST_WEBSOCKET_SERVER/websockets/headers")
                     header(CUSTOM_HEADER, CUSTOM_HEADER_VALUE)
+                    header("A", "B")
+                    header("A", "C")
                 }
 
                 val frame = session.incoming.receive()
                 assertTrue(frame is Frame.Text)
-                val headers = Json.decodeFromString<Map<String, String>>(frame.readText())
+                val text = frame.readText()
+                val headers = Json.decodeFromString<Map<String, String>>(text)
                 assertEquals(headers[CUSTOM_HEADER], CUSTOM_HEADER_VALUE)
+                assertEquals(headers["A"], "B,C")
             }
         }
     }
