@@ -114,6 +114,9 @@ internal class CurlMultiApiHandler : Closeable {
             }
             request.caPath?.let { option(CURLOPT_CAPATH, it) }
             request.caInfo?.let { option(CURLOPT_CAINFO, it) }
+            if (request.isUpgradeRequest) {
+                option(CURLOPT_CONNECT_ONLY, 2L)
+            }
         }
 
         curl_multi_add_handle(multiHandle, easyHandle).verify()
@@ -337,6 +340,7 @@ internal class CurlMultiApiHandler : Closeable {
             val headers = headersBytes.build().readBytes()
 
             CurlSuccess(
+                easyHandle,
                 httpStatusCode.value.toInt(),
                 httpProtocolVersion.value.toUInt(),
                 headers,

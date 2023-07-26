@@ -11,6 +11,7 @@ import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.http.content.*
+import io.ktor.util.*
 import io.ktor.utils.io.*
 import io.ktor.utils.io.core.*
 import kotlinx.cinterop.*
@@ -18,6 +19,7 @@ import kotlinx.coroutines.*
 import libcurl.*
 import kotlin.coroutines.*
 
+@OptIn(InternalAPI::class)
 internal suspend fun HttpRequestData.toCurlRequest(config: CurlClientEngineConfig): CurlRequestData = CurlRequestData(
     url = url.toString(),
     method = method.value,
@@ -30,7 +32,8 @@ internal suspend fun HttpRequestData.toCurlRequest(config: CurlClientEngineConfi
     forceProxyTunneling = config.forceProxyTunneling,
     sslVerify = config.sslVerify,
     caInfo = config.caInfo,
-    caPath = config.caPath
+    caPath = config.caPath,
+    isUpgradeRequest = isUpgradeRequest()
 )
 
 internal class CurlRequestData(
@@ -45,7 +48,8 @@ internal class CurlRequestData(
     val forceProxyTunneling: Boolean,
     val sslVerify: Boolean,
     val caInfo: String?,
-    val caPath: String?
+    val caPath: String?,
+    val isUpgradeRequest: Boolean
 ) {
     override fun toString(): String =
         "CurlRequestData(url='$url', method='$method', content: $contentLength bytes)"
@@ -59,6 +63,7 @@ internal class CurlResponseBuilder(val request: CurlRequestData) {
 internal sealed class CurlResponseData
 
 internal class CurlSuccess(
+    val handle: EasyHandle,
     val status: Int,
     val version: UInt,
     val headersBytes: ByteArray,
